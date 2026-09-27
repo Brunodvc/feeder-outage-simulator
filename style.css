@@ -24,11 +24,11 @@
     display:flex; flex-direction:column; align-items:center;
     padding:24px 16px 40px;
   }
-  header{ width:100%; max-width:920px; margin-bottom:8px; }
+  header{ width:100%; max-width:1140px; margin-bottom:8px; }
   h1{ font-size:1.3rem; font-weight:600; margin:0 0 4px; letter-spacing:.01em; }
   .sub{ color:var(--muted); font-size:.9rem; margin:0 0 18px; }
   .toolbar{
-    width:100%; max-width:920px; display:flex; align-items:center;
+    width:100%; max-width:1140px; display:flex; align-items:center;
     justify-content:space-between; gap:12px; margin-bottom:12px; flex-wrap:wrap;
   }
   .status{
@@ -43,23 +43,56 @@
     border-radius:8px; padding:9px 16px; transition:background .15s, border-color .15s;
   }
   button:hover{ background:#1B2740; border-color:#3A4C6E; }
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  button.active{ background:#1B2740; border-color:var(--tie-closed); color:var(--tie-closed); }
+  #deleteBtn.active{ border-color:var(--fault); color:var(--fault); }
+  .mode-hint{ width:100%; max-width:1140px; margin:-4px 0 10px; font-size:.82rem; color:var(--tie-closed); }
+  .mode-hint[hidden]{ display:none; }
   .board{
-    width:100%; max-width:920px; background:var(--panel);
+    flex:1; min-width:0; background:var(--panel);
     border:1px solid var(--line); border-radius:12px; padding:8px;
+    position:relative; overflow:hidden;
   }
-  svg{ width:100%; height:auto; display:block; }
+  svg{ width:100%; height:auto; display:block; touch-action:none; cursor:grab; }
+  svg.panning{ cursor:grabbing; }
+  .customer{ cursor:move; }
+  svg.moving, svg.moving *{ cursor:move; }
+  svg.mode-add, svg.mode-add .edge-hit{ cursor:crosshair; }
+  svg.mode-delete .edge-hit{ cursor:default; }
+  svg.mode-delete .customer{ cursor:pointer; }
+  svg.mode-delete .customer:hover{ stroke:var(--fault); stroke-width:3; }
+  .ghost{ pointer-events:none; }
+  .zoom-controls{ position:absolute; top:12px; right:12px; display:flex; flex-direction:column; gap:6px; }
+  .zoom-controls button{ width:32px; height:32px; padding:0; font-size:1.1rem; line-height:1; }
   .edge{ pointer-events:none; }
   .edge-hit{ cursor:pointer; fill:none; stroke:transparent; stroke-width:18; }
   .node-label{ font-family:var(--mono); font-size:12px; fill:var(--muted); pointer-events:none; }
   .node-label.strong{ fill:var(--text); font-weight:600; }
   .edge-label{ font-family:var(--mono); font-size:10px; fill:var(--muted); pointer-events:none; }
+  .workspace{ width:100%; max-width:1140px; display:flex; gap:12px; align-items:flex-start; }
+  .stats{
+    flex:0 0 200px; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; font-family:var(--mono); font-size:.82rem;
+  }
+  .stats h2{ font-family:var(--sans); font-size:.8rem; font-weight:600; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); margin:0 0 8px; }
+  .stats dl{ display:grid; grid-template-columns:1fr auto; gap:5px 10px; margin:0 0 16px; }
+  .stats dt{ color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .stats dd{ margin:0; text-align:right; color:var(--text); }
+  .stats .swatch{ width:9px; height:9px; }
+  .stats-note{ margin:0; color:var(--muted); font-size:.72rem; }
   .legend{
-    width:100%; max-width:920px; margin-top:16px; display:flex; flex-wrap:wrap;
+    width:100%; max-width:1140px; margin-top:16px; display:flex; flex-wrap:wrap;
     gap:14px 22px; font-size:.82rem; color:var(--muted); font-family:var(--mono);
   }
   .legend span{ display:inline-flex; align-items:center; gap:7px; }
   .swatch{ width:12px; height:12px; border-radius:3px; display:inline-block; }
   .swatch.line{ border-radius:0; height:3px; width:16px; }
-  footer{ width:100%; max-width:920px; margin-top:22px; color:var(--muted); font-size:.85rem; line-height:1.5; }
+  footer{ width:100%; max-width:1140px; margin-top:22px; color:var(--muted); font-size:.85rem; line-height:1.5; }
   footer b{ color:var(--text); }
+  @media (max-width:760px){
+    .workspace{ flex-direction:column; }
+    .stats{ flex:none; width:100%; }
+    .board{ width:100%; }
+  }
   @media (max-width:600px){ h1{font-size:1.1rem;} .status{font-size:.85rem;} }

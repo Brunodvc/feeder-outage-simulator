@@ -10,16 +10,49 @@
 
 <header>
   <h1>Distribution Feeder Outage Simulator</h1>
-  <p class="sub">Click a line segment to fault it. Click the dashed tie line to close the backup switch.</p>
+  <p class="sub">Click a line segment to fault it. Click the dashed tie line to close the backup switch. Scroll to zoom, drag to pan.</p>
 </header>
 
 <div class="toolbar">
   <div class="status" id="statusBox">6 of 6 customers powered</div>
-  <button id="resetBtn">Reset feeder</button>
+  <div class="actions">
+    <button id="addBtn">+ Add customer</button>
+    <button id="deleteBtn">&minus; Delete customer</button>
+    <button id="resetBtn">Reset feeder</button>
+  </div>
 </div>
+<p class="mode-hint" id="modeHint" hidden></p>
+
+<div class="workspace">
+<aside class="stats" id="statsPanel">
+  <h2>Customers</h2>
+  <dl>
+    <dt>Total</dt><dd id="statCustTotal">�</dd>
+    <dt>In view</dt><dd id="statCustView">�</dd>
+    <dt><i class="swatch" style="background:var(--powered)"></i>Powered</dt><dd id="statCustPowered">�</dd>
+    <dt><i class="swatch" style="background:var(--restored)"></i>Restored</dt><dd id="statCustRestored">�</dd>
+    <dt><i class="swatch" style="background:var(--out)"></i>Out</dt><dd id="statCustOut">�</dd>
+  </dl>
+  <h2>Wire length</h2>
+  <dl>
+    <dt>Total</dt><dd id="statWireTotal">�</dd>
+    <dt>Main trunk</dt><dd id="statWireMain">�</dd>
+    <dt>Laterals</dt><dd id="statWireLateral">�</dd>
+    <dt>Tie line</dt><dd id="statWireTie">�</dd>
+    <dt>Energized</dt><dd id="statWireLive">�</dd>
+    <dt>Faulted</dt><dd id="statWireFault">�</dd>
+  </dl>
+  <p class="stats-note">Scale: 1 grid unit = 10 ft</p>
+</aside>
 
 <div class="board">
   <svg id="svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="zoom-controls">
+    <button id="zoomIn" title="Zoom in">+</button>
+    <button id="zoomOut" title="Zoom out">&minus;</button>
+    <button id="zoomReset" title="Reset view">&#8634;</button>
+  </div>
+</div>
 </div>
 
 <div class="legend">
