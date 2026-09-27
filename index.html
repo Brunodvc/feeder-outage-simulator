@@ -10,15 +10,21 @@
 
 <header>
   <h1>Distribution Feeder Outage Simulator</h1>
-  <p class="sub">Click a line segment to fault it. Click the dashed tie line to close the backup switch. Scroll to zoom, drag to pan.</p>
+  <p class="sub">Click any line to fault it. Click a dashed tie line to open or close it. Click a power plant to start or stop it. Click a customer to see its load. Scroll to zoom, drag to pan.</p>
 </header>
 
 <div class="toolbar">
   <div class="status" id="statusBox">6 of 6 customers powered</div>
   <div class="actions">
-    <button id="addBtn">+ Add customer</button>
-    <button id="deleteBtn">&minus; Delete customer</button>
-    <button id="resetBtn">Reset feeder</button>
+    <button id="plantBtn">+ Power plant</button>
+    <button id="stepUpBtn">+ Step-up</button>
+    <button id="stepDownBtn">+ Step-down</button>
+    <button id="xfmrBtn">+ Transformer</button>
+    <button id="addBtn">+ Customer</button>
+    <button id="lineBtn">+ Line</button>
+    <button id="tieBtn">+ Tie switch</button>
+    <button id="deleteBtn">&minus; Delete</button>
+    <button id="resetBtn">Reset</button>
   </div>
 </div>
 <p class="mode-hint" id="modeHint" hidden></p>
@@ -27,20 +33,30 @@
 <aside class="stats" id="statsPanel">
   <h2>Customers</h2>
   <dl>
-    <dt>Total</dt><dd id="statCustTotal">�</dd>
-    <dt>In view</dt><dd id="statCustView">�</dd>
-    <dt><i class="swatch" style="background:var(--powered)"></i>Powered</dt><dd id="statCustPowered">�</dd>
-    <dt><i class="swatch" style="background:var(--restored)"></i>Restored</dt><dd id="statCustRestored">�</dd>
-    <dt><i class="swatch" style="background:var(--out)"></i>Out</dt><dd id="statCustOut">�</dd>
+    <dt>Total</dt><dd id="statCustTotal">&ndash;</dd>
+    <dt>In view</dt><dd id="statCustView">&ndash;</dd>
+    <dt><i class="swatch" style="background:var(--powered)"></i>Powered</dt><dd id="statCustPowered">&ndash;</dd>
+    <dt><i class="swatch" style="background:var(--restored)"></i>Restored</dt><dd id="statCustRestored">&ndash;</dd>
+    <dt><i class="swatch" style="background:var(--out)"></i>Out</dt><dd id="statCustOut">&ndash;</dd>
+  </dl>
+  <h2>Equipment</h2>
+  <dl>
+    <dt>Power plants</dt><dd id="statPlants">&ndash;</dd>
+    <dt>Step-up subs</dt><dd id="statStepUp">&ndash;</dd>
+    <dt>Step-down subs</dt><dd id="statStepDown">&ndash;</dd>
+    <dt>Transformers</dt><dd id="statXfmr">&ndash;</dd>
+    <dt>Tie switches</dt><dd id="statTies">&ndash;</dd>
   </dl>
   <h2>Wire length</h2>
   <dl>
-    <dt>Total</dt><dd id="statWireTotal">�</dd>
-    <dt>Main trunk</dt><dd id="statWireMain">�</dd>
-    <dt>Laterals</dt><dd id="statWireLateral">�</dd>
-    <dt>Tie line</dt><dd id="statWireTie">�</dd>
-    <dt>Energized</dt><dd id="statWireLive">�</dd>
-    <dt>Faulted</dt><dd id="statWireFault">�</dd>
+    <dt>Total</dt><dd id="statWireTotal">&ndash;</dd>
+    <dt>Gen leads 13 kV</dt><dd id="statWireLead">&ndash;</dd>
+    <dt>Transm. 500 kV</dt><dd id="statWireTrans">&ndash;</dd>
+    <dt>Primary 35 kV</dt><dd id="statWirePrimary">&ndash;</dd>
+    <dt>Second. 120 V</dt><dd id="statWireSecondary">&ndash;</dd>
+    <dt>Tie lines</dt><dd id="statWireTie">&ndash;</dd>
+    <dt>Energized</dt><dd id="statWireLive">&ndash;</dd>
+    <dt>Faulted</dt><dd id="statWireFault">&ndash;</dd>
   </dl>
   <p class="stats-note">Scale: 1 grid unit = 10 ft</p>
 </aside>
@@ -50,29 +66,99 @@
   <div class="zoom-controls">
     <button id="zoomIn" title="Zoom in">+</button>
     <button id="zoomOut" title="Zoom out">&minus;</button>
+    <button id="zoomFit" title="Show whole area">&#10530;</button>
     <button id="zoomReset" title="Reset view">&#8634;</button>
   </div>
 </div>
 </div>
 
+<section class="sim">
+  <div class="sim-controls">
+    <button id="simStartBtn">Start simulation</button>
+    <button id="simResetBtn">Reset simulation</button>
+    <label>Speed
+      <select id="simSpeed">
+        <option value="1">1 hour / sec</option>
+        <option value="3" selected>3 hours / sec</option>
+        <option value="6">6 hours / sec</option>
+        <option value="12">12 hours / sec</option>
+      </select>
+    </label>
+    <div class="sim-clock"><span id="simClock">Not started</span> <span id="simPhase" class="sim-phase"></span></div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><span class="tile-label">Generating now</span><span class="tile-value" id="tileGen">&ndash;</span></div>
+    <div class="tile"><span class="tile-label">Energy so far</span><span class="tile-value" id="tileEnergy">&ndash;</span></div>
+    <div class="tile"><span class="tile-label">Generation cost so far</span><span class="tile-value" id="tileCost">&ndash;</span></div>
+    <div class="tile"><span class="tile-label">Customers served</span><span class="tile-value" id="tileServed">&ndash;</span></div>
+    <div class="tile"><span class="tile-label">Generation price</span><span class="tile-value" id="tileRate">&ndash;</span></div>
+  </div>
+
+  <div class="charts">
+    <figure class="chart">
+      <figcaption>Power generated (kW)</figcaption>
+      <div class="chart-wrap">
+        <svg id="chart-gen" viewBox="0 0 360 190" role="img" aria-label="Total power generated over three days, in kilowatts"></svg>
+        <div class="chart-tip" id="tip-gen" hidden></div>
+      </div>
+    </figure>
+    <figure class="chart">
+      <figcaption>Cumulative generation cost ($)</figcaption>
+      <div class="chart-wrap">
+        <svg id="chart-cost" viewBox="0 0 360 190" role="img" aria-label="Cumulative cost of generated power over three days, in dollars"></svg>
+        <div class="chart-tip" id="tip-cost" hidden></div>
+      </div>
+    </figure>
+    <figure class="chart">
+      <figcaption id="custTitle">Customer load (kW)</figcaption>
+      <div class="chart-legend" id="custLegend" hidden>
+        <span><i class="tip-key" style="border-color:var(--series-1)"></i>Actual</span>
+        <span><i class="tip-key dashed" style="border-color:var(--series-2)"></i>Typical</span>
+      </div>
+      <div class="chart-wrap">
+        <svg id="chart-cust" viewBox="0 0 360 190" role="img" aria-label="Selected customer's power consumption over three days, in kilowatts"></svg>
+        <div class="chart-tip" id="tip-cust" hidden></div>
+        <p class="chart-empty" id="custEmpty">Click a customer on the map to see its load over time.</p>
+      </div>
+    </figure>
+  </div>
+
+  <details id="simTable">
+    <summary>Data table (hourly)</summary>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Time</th><th>Generated (kW)</th><th>Energy (kWh)</th><th>Cost</th><th id="tableCustHead">Customer (kW)</th></tr></thead>
+        <tbody id="simTableBody"></tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
 <div class="legend">
   <span><i class="swatch" style="background:var(--powered)"></i>Powered</span>
   <span><i class="swatch" style="background:var(--restored)"></i>Restored via tie</span>
   <span><i class="swatch" style="background:var(--out)"></i>Out of service</span>
-  <span><i class="swatch line" style="background:var(--line)"></i>Normal line</span>
+  <span><i class="swatch line hv" style="background:var(--hv)"></i>Transmission 500 kV</span>
+  <span><i class="swatch line" style="background:var(--hv)"></i>Gen lead 13 kV</span>
+  <span><i class="swatch line" style="background:var(--line)"></i>Primary 35 kV</span>
+  <span><i class="swatch line lv" style="background:var(--lv)"></i>Secondary 120 V</span>
   <span><i class="swatch line" style="background:var(--fault)"></i>Faulted line</span>
   <span><i class="swatch line" style="background:var(--tie-open)"></i>Tie switch (open)</span>
   <span><i class="swatch line" style="background:var(--tie-closed)"></i>Tie switch (closed)</span>
 </div>
 
 <footer>
-  This models a radial distribution feeder: one <b>substation</b> feeding a main trunk with three
-  <b>lateral branches</b>, each serving two customers. Faulting a line segment cascades an outage to
-  every customer downstream of it — closing the normally-open <b>tie switch</b> can restore isolated
-  customers by re-energizing them from a different, still-powered branch, the same strategy utilities
-  use to minimize outage scope during a real fault.
+  This models the full path of electricity: a <b>power plant</b> feeds a <b>step-up substation</b>, which
+  raises the plant's 13 kV output to 500 kV for long-distance <b>transmission lines</b>. A <b>step-down substation</b>
+  lowers it to 35 kV for the primary distribution feeder, and <b>distribution transformers</b> near the customers
+  drop it to the 120 V secondary service that runs to each home. Faulting any
+  line or stopping a plant cascades an outage to everything downstream of it; closing a normally-open
+  <b>tie switch</b> can restore isolated customers from a different, still-powered path, the same strategy
+  utilities use to minimize outage scope during a real fault.
 </footer>
 
 <script src="script.js"></script>
+<script src="sim.js"></script>
 </body>
 </html>
