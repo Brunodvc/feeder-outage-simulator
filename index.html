@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feeder Outage Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>Distribution Feeder Outage Simulator</h1>
+  <p class="sub">Click a line segment to fault it. Click the dashed tie line to close the backup switch.</p>
+</header>
+
+<div class="toolbar">
+  <div class="status" id="statusBox">6 of 6 customers powered</div>
+  <button id="resetBtn">Reset feeder</button>
+</div>
+
+<div class="board">
+  <svg id="svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div class="legend">
+  <span><i class="swatch" style="background:var(--powered)"></i>Powered</span>
+  <span><i class="swatch" style="background:var(--restored)"></i>Restored via tie</span>
+  <span><i class="swatch" style="background:var(--out)"></i>Out of service</span>
+  <span><i class="swatch line" style="background:var(--line)"></i>Normal line</span>
+  <span><i class="swatch line" style="background:var(--fault)"></i>Faulted line</span>
+  <span><i class="swatch line" style="background:var(--tie-open)"></i>Tie switch (open)</span>
+  <span><i class="swatch line" style="background:var(--tie-closed)"></i>Tie switch (closed)</span>
+</div>
+
+<footer>
+  This models a radial distribution feeder: one <b>substation</b> feeding a main trunk with three
+  <b>lateral branches</b>, each serving two customers. Faulting a line segment cascades an outage to
+  every customer downstream of it — closing the normally-open <b>tie switch</b> can restore isolated
+  customers by re-energizing them from a different, still-powered branch, the same strategy utilities
+  use to minimize outage scope during a real fault.
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
