@@ -99,7 +99,11 @@ function render(){
     });
     const line = el('line', {x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke, 'stroke-width':4, class:'edge'});
     const mid = midpoint(a,b);
-    const label = el('text', {x:mid.x+8, y:mid.y-6, class:'edge-label'});
+    // vertical edges: label to the right; horizontal edges: centered above the line
+    const vertical = a.x === b.x;
+    const label = vertical
+      ? el('text', {x:mid.x+10, y:mid.y+4, class:'edge-label'})
+      : el('text', {x:mid.x, y:mid.y-10, 'text-anchor':'middle', class:'edge-label'});
     label.textContent = e.label;
     svg.appendChild(hit); svg.appendChild(line); svg.appendChild(label);
   });
@@ -115,7 +119,8 @@ function render(){
     });
     const line = el('line', {x1:a.x,y1:a.y,x2:b.x,y2:b.y, stroke, 'stroke-width':3, 'stroke-dasharray':'7,6', class:'edge'});
     const mid = midpoint(a,b);
-    const label = el('text', {x:mid.x+8, y:mid.y, class:'edge-label'});
+    // anchor to the left of the line so the label never runs off the right edge
+    const label = el('text', {x:mid.x-10, y:mid.y+4, 'text-anchor':'end', class:'edge-label'});
     label.textContent = TIE.label + ' (' + TIE.status + ')';
     svg.appendChild(hit); svg.appendChild(line); svg.appendChild(label);
   }
@@ -124,7 +129,7 @@ function render(){
   NODES.forEach(n => {
     if (n.type === 'substation'){
       svg.appendChild(el('rect', {x:n.x-22,y:n.y-16,width:44,height:32, rx:4, fill:'#1B2740', stroke:'var(--line)', 'stroke-width':2}));
-      const t = el('text', {x:n.x, y:n.y+45, 'text-anchor':'middle', class:'node-label strong'});
+      const t = el('text', {x:n.x+32, y:n.y+4, class:'node-label strong'});
       t.textContent = n.label; svg.appendChild(t);
     } else if (n.type === 'junction'){
       svg.appendChild(el('circle', {cx:n.x, cy:n.y, r:6, fill:'#1B2740', stroke:'var(--line)', 'stroke-width':2}));

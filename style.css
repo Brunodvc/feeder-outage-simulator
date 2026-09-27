@@ -48,9 +48,9 @@
     border:1px solid var(--line); border-radius:12px; padding:8px;
   }
   svg{ width:100%; height:auto; display:block; }
-  .edge{ cursor:pointer; }
+  .edge{ pointer-events:none; }
   .edge-hit{ cursor:pointer; fill:none; stroke:transparent; stroke-width:18; }
-  .node-label{ font-family:var(--mono); font-size:12px; fill:var(--muted); }
+  .node-label{ font-family:var(--mono); font-size:12px; fill:var(--muted); pointer-events:none; }
   .node-label.strong{ fill:var(--text); font-weight:600; }
   .edge-label{ font-family:var(--mono); font-size:10px; fill:var(--muted); pointer-events:none; }
   .legend{
